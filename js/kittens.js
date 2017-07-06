@@ -1,11 +1,14 @@
 
 // This sectin contains some game constants. It is not super interesting
-var GAME_WIDTH = 375;
+var GAME_WIDTH = 750;
 var GAME_HEIGHT = 500;
+
+var UP_ARROW_CODE = 38;
+var DOWN_ARROW_CODE = 40;
 
 var ENEMY_WIDTH = 75;
 var ENEMY_HEIGHT = 156;
-var MAX_ENEMIES = 3;
+var MAX_ENEMIES = 6;
 
 var PLAYER_WIDTH = 75;
 var PLAYER_HEIGHT = 54;
@@ -41,7 +44,7 @@ class Music {
     }
     
     horn() {
-        this.hornSound = new Sound("audio/ting.wav");
+        this.hornSound = new Sound("audio/ziab.wav");
         this.hornSound.play();
     }
     
@@ -93,8 +96,8 @@ class Enemy extends Entity {
         this.sprite = images['enemy.png'];
 
         // Each enemy should have a different speed
-        //this.speed = Math.random() / 2 + 0.25;
-        this.speed = 0.2;
+        this.speed = Math.random() / 2 + 0.25;
+        
     }
 
     update(timeDiff) {
@@ -105,7 +108,7 @@ class Enemy extends Entity {
 class Player extends Entity {
     constructor() {
         super();
-        this.x = 2 * PLAYER_WIDTH;
+        this.x = 4 * PLAYER_WIDTH;
         this.y = GAME_HEIGHT - PLAYER_HEIGHT - 10;
         this.sprite = images['player.png'];
     }
@@ -157,7 +160,7 @@ class Engine {
      The game allows for 5 horizontal slots where an enemy can be present.
      At any point in time there can be at most MAX_ENEMIES enemies otherwise the game would be impossible
      */
-    setupEnemies() {
+       setupEnemies() {
         if (!this.enemies) {
             this.enemies = [];
         }
@@ -166,7 +169,8 @@ class Engine {
             this.addEnemy();
         }
     }
-
+    
+    
     // This method finds a random spot where there is no enemy, and puts one in there
     addEnemy() {
         var enemySpots = GAME_WIDTH / ENEMY_WIDTH;
@@ -176,9 +180,19 @@ class Engine {
         while (!enemySpots || this.enemies[enemySpot]) {
             enemySpot = Math.floor(Math.random() * enemySpots);
         }
-        //  
-        this.enemies[enemySpot] = new Enemy(enemySpot * ENEMY_WIDTH);
-    }
+        this.enemies.forEach((enemy, i) => {
+            if(this.score%2){
+                Enemy.sprite = images['player.png'];
+            }
+        });
+        this.enemies[enemySpot] = new Enemy (enemySpot * ENEMY_WIDTH);
+   
+        }
+    
+    
+    
+    
+    
 
     // This method kicks off the game
     start() {
@@ -227,7 +241,7 @@ class Engine {
         this.ctx.drawImage(images['stars.png'], 0, 0); // draw the star bg
         this.enemies.forEach(enemy => enemy.render(this.ctx)); // draw the enemies
         this.player.render(this.ctx); // draw the player
-        this.ctx.fillText("Level: " + this.level, 275, 30);
+        this.ctx.fillText("Level: " + this.level, 600, 30);
 
         // Check if any enemies should die
         this.enemies.forEach((enemy, enemyIdx) => {
@@ -242,7 +256,7 @@ class Engine {
             // If they are dead, then it's game over!
             this.ctx.font = 'bold 30px Impact';
             this.ctx.fillStyle = '#ffffff';
-            this.ctx.fillText(this.score + ' GAME OVER', 5, 30);
+            this.ctx.fillText(this.score + ' GAME OVER - PRESS ENTER', 5, 30);
             this.gameMusic.horn();
             this.gameMusic.stopMusic();
             
