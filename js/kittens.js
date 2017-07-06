@@ -12,6 +12,7 @@ var PLAYER_HEIGHT = 54;
 // These two constants keep us from using "magic numbers" in our code
 var LEFT_ARROW_CODE = 37;
 var RIGHT_ARROW_CODE = 39;
+var ENTER_KEY = 13;
 
 // These two constants allow us to DRY
 var MOVE_LEFT = 'left';
@@ -29,9 +30,19 @@ var images = {};
 
 
 
+class Entity{
+        
+        render(ctx) {
+        ctx.drawImage(this.sprite, this.x, this.y);
+        // ctx.drawImage(this.sprite, 0, 100);
+        }
+        
+}
+
 // This section is where you will be doing most of your coding
-class Enemy {
+class Enemy extends Entity{
     constructor(xPos) {
+        super();
         this.x = xPos;
         this.y = -ENEMY_HEIGHT;
         this.sprite = images['enemy.png'];
@@ -44,16 +55,20 @@ class Enemy {
         this.y = this.y + timeDiff * this.speed;
     }
 
-    render(ctx) {
-        ctx.drawImage(this.sprite, this.x, this.y);
-    }
+    // render(ctx) {
+    //     ctx.drawImage(this.sprite, this.x, this.y);
+    //     // ctx.drawImage(this.sprite, 0, 100);
+    // }
 }
 
-class Player {
+class Player extends Entity{
+    
     constructor() {
+        super();
         this.x = 2 * PLAYER_WIDTH;
         this.y = GAME_HEIGHT - PLAYER_HEIGHT - 10;
         this.sprite = images['player.png'];
+        
     }
 
     // This method is called by the game engine when left/right arrows are pressed
@@ -66,9 +81,10 @@ class Player {
         }
     }
 
-    render(ctx) {
-        ctx.drawImage(this.sprite, this.x, this.y);
-    }
+    // render(ctx) {
+    //     ctx.drawImage(this.sprite, this.x, this.y);
+    //     // ctx.drawImage(this.sprite, 0, 100);
+    // }
 }
 
 
@@ -120,7 +136,7 @@ class Engine {
 
         var enemySpot;
         // Keep looping until we find a free enemy spot at random
-        while (!enemySpot || this.enemies[enemySpot]) {
+        while (!enemySpots || this.enemies[enemySpot]) {
             enemySpot = Math.floor(Math.random() * enemySpots);
         }
 
@@ -129,10 +145,23 @@ class Engine {
 
     // This method kicks off the game
     start() {
+        
+        
+        
         this.score = 0;
         this.lastFrame = Date.now();
+        
+        
+        
 
         // Listen for keyboard left/right and update the player
+        
+         document.addEventListener('keypress', e => {
+          if (e.keyCode === ENTER_KEY) {
+             location.reload();
+          }
+        })
+        
         document.addEventListener('keydown', e => {
             if (e.keyCode === LEFT_ARROW_CODE) {
                 this.player.move(MOVE_LEFT);
@@ -143,7 +172,13 @@ class Engine {
         });
 
         this.gameLoop();
+        
+        
+        
+        
     }
+    
+    
 
     /*
     This is the core of the game engine. The `gameLoop` function gets called ~60 times per second
@@ -178,6 +213,12 @@ class Engine {
             }
         });
         this.setupEnemies();
+        
+        
+     
+        
+        
+        
 
         // Check if player is dead
         if (this.isPlayerDead()) {
@@ -185,7 +226,16 @@ class Engine {
             this.ctx.font = 'bold 30px Impact';
             this.ctx.fillStyle = '#ffffff';
             this.ctx.fillText(this.score + ' GAME OVER', 5, 30);
+        
+          
         }
+         
+            
+            
+          
+            
+          
+        
         else {
             // If player is not dead, then draw the score
             this.ctx.font = 'bold 30px Impact';
@@ -200,14 +250,43 @@ class Engine {
 
     isPlayerDead() {
         // TODO: fix this function!
-        return false;
+        
+        
+        
+        // console.log("player positionX: ",this.player.x);
+        // console.log("player positionY: ",this.player.y);
+            
+            
+            var dead = false;
+            var hitZone= GAME_HEIGHT-PLAYER_HEIGHT-ENEMY_HEIGHT;
+           
+            
+        this.enemies.forEach((enemy, enemyIdx) => {
+            
+            // console.log("enemy positionX:" ,enemy.x);
+            // console.log("enemy positionY:" ,enemy.y);
+            
+            if(enemy.x === this.player.x && enemy.y> hitZone-10){
+                dead = true;
+                return;
+            }
+        });
+          
+        return dead;
     }
+    
+   
 }
 
 
 
 
 
+
+
 // This section will start the game
+
 var gameEngine = new Engine(document.getElementById('app'));
 gameEngine.start();
+
+
